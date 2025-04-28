@@ -3,6 +3,7 @@ import re
 import httpx
 from mcp.server.fastmcp import FastMCP
 import feedparser
+import fitz
 
 mcp = FastMCP("arxiv-server")
 
@@ -38,15 +39,19 @@ async def get_pdf(url: str) -> bytes | None:
         except Exception:
             return None
         
-async def get_url_and_arxiv_id(title: str) -> str:
+async def get_url_and_arxiv_id(title: str) -> tuple[str, str] | str:
     """Get URL of the article hosted on arXiv.org."""
     url = f"{ARXIV_API_BASE}/query"
     payload = {"search_query": f'ti:"{title}"'}
     data = await make_api_call(url, params=payload)
+    if data is None:
+        return "Unable to retrieve data from arXiv.org."
     feed = feedparser.parse(data)
-    entry = feed.entries[0]
     if not feed.entries:
-        return "Unable to fetch arXiv id. This could be due to incorrect title being provided."
+        return "Unable to extract arXiv ID for the provided title. " \
+        "This issue may stem from an incorrect or incomplete title, " \
+        "or because the work has not been published on arXiv."
+    entry = feed.entries[0]
     arxiv_id = entry.id.split("/abs/")[-1]
     direct_pdf_url = f"https://arxiv.org/pdf/{arxiv_id}"
     return (direct_pdf_url, arxiv_id)
@@ -64,10 +69,8 @@ def format_text(text: str) -> str:
 @mcp.tool()
 async def get_article_url(title: str) -> str:
     """
-    Retrieve the URL of an article hosted on arXiv.org based on its title.
-    
-    This function formats the given title and then fetches the corresponding 
-    article URL from arXiv.org using an internal helper function.
+    Retrieve the URL of an article hosted on arXiv.org based on its title. Use this tool only for retrieving \
+        the URL. This tool searches for the article based on its title, and then fetches the corresponding URL from arXiv.org.
 
     Args:
         title: Article title.
@@ -76,30 +79,65 @@ async def get_article_url(title: str) -> str:
         URL that can be used to retrieve the article.
     """
     formatted_title = format_text(title)
-    article_url, _ = await get_url_and_arxiv_id(formatted_title)
+    result = await get_url_and_arxiv_id(formatted_title)
+    if isinstance(result, str):
+        return result
+    article_url, _ = result
     return article_url
 
 @mcp.tool()
-async def download_article(title: str) -> bytes | str:
+async def download_article(title: str) -> str:
     """
-    Download the article hosted on arXiv.org as a PDF file.
-
-    This tool searches for the article based on its title, retrieves the article's PDF, 
-    and saves it to a specified download location using the arXiv ID as the filename.
+    Download the article hosted on arXiv.org as a PDF file. This tool searches for the article based on its title, retrieves \
+        the article's PDF, and saves it to a specified download location using the arXiv ID as the filename.
 
     Args:
         title: Article title.
 
     Returns:
-        Succesful message.
+        Success or error message.
     """
     formatted_title = format_text(title)
-    article_url, arxiv_id = await get_url_and_arxiv_id(formatted_title)
-    pdf_document = await get_pdf(article_url)
+    result = await get_url_and_arxiv_id(formatted_title)
+    if isinstance(result, str):
+        return result
+    article_url, arxiv_id = result
+    pdf_doc = await get_pdf(article_url)
+    if pdf_doc is None:
+        return "Unable to retrieve the article from arXiv.org."
     file_path = os.path.join(DOWNLOAD_PATH, f"{arxiv_id}.pdf")
-    with open(file_path, "wb") as file:
-        file.write(pdf_document)
-    return "Success"
+    try:
+        with open(file_path, "wb") as file:
+            file.write(pdf_doc)
+        return f"Download successful. Find the PDF at {DOWNLOAD_PATH}."
+    except Exception:
+        return f"Unable to save the article to local directory."
+
+@mcp.tool()
+async def load_article_to_context(title: str) -> str:
+    """
+    Load the article hosted on arXiv.org into context. This tool searches for the article based on its title, retrieves \
+        the article content, and loads text content into LLM context.
+
+    Args:
+        title: Article title.
+
+    Returns:
+        Article as a text string or error message.
+    """
+    formatted_title = format_text(title)
+    result = await get_url_and_arxiv_id(formatted_title)
+    if isinstance(result, str):
+        return result
+    article_url, _ = result
+    pdf_doc = await get_pdf(article_url)
+    if pdf_doc is None:
+        return "Unable to retrieve the article from arXiv.org."
+    pymupdf_doc = fitz.open(stream=pdf_doc, filetype="pdf")
+    content = ""
+    for page in pymupdf_doc:
+        content += page.get_text()
+    return content
 
 
 if __name__ == "__main__":
