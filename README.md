@@ -36,14 +36,6 @@ A Model Context Protocol (MCP) server that enables interacting with the arXiv AP
 
 ## Setup
 
-### Installing via Smithery
-
-To install arXiv Server for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@prashalruchiranga/arxiv-mcp-server):
-
-```bash
-npx -y @smithery/cli install @prashalruchiranga/arxiv-mcp-server --client claude
-```
-
 ### Manual Installation
 
 Clone the repository
