@@ -126,7 +126,7 @@ async def get_article_url(title: str) -> str:
     return article_url
 
 @mcp.tool()
-async def download_article(ctx: Context, title: str) -> str:
+async def download_article(title: str) -> str:
     """
     Download the article hosted on arXiv.org as a PDF file. This tool searches for the article based on its 
     title, retrieves the article's PDF, and saves it to a specified download location using the arXiv ID as 
@@ -226,7 +226,6 @@ async def search_arxiv(ctx: Context, all_fields: Optional[str]=None, title: Opti
     as keys and their corresponding arXiv IDs as values.
 
     Args:
-        ctx: fastmcp.Context object
         all_fields: General keyword search across all metadata fields including title, abstract, authors, comments, and categories.
         title: Keyword(s) to search for within the titles of articles.
         author: Author name(s) to filter results by.
@@ -249,7 +248,7 @@ async def search_arxiv(ctx: Context, all_fields: Optional[str]=None, title: Opti
         prefixed_params.append(f'ti:{title}')
     if abstract:
         abstract = format_text(abstract)
-        prefixed_params.append(f'ab:{abstract}')
+        prefixed_params.append(f'abs:{abstract}')
     # Construct search query
     search_query = " AND ".join(prefixed_params)
     params = {
@@ -275,8 +274,7 @@ async def search_arxiv(ctx: Context, all_fields: Optional[str]=None, title: Opti
         article_title = entry.title   
         arxiv_id = id.split("/abs/")[-1]
         authors = [author['name'] for author in entry.authors]
-        published = getattr(entry, "published", "Unknown")
-        entries[article_title] = {"arXiv ID": arxiv_id, "Authors": authors, "Published date and time": published}
+        entries[article_title] = {"arXiv ID": arxiv_id, "Authors": authors}
     return entries
 
 def main():
