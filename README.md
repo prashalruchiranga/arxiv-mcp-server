@@ -3,6 +3,7 @@
 [![MCP Compatible](https://img.shields.io/badge/MCP-Compatible-purple.svg)](https://modelcontextprotocol.io)
 [![Python](https://img.shields.io/badge/python-3.13+-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![smithery badge](https://smithery.ai/badge/@prashalruchiranga/arxiv-mcp-server)](https://smithery.ai/server/@prashalruchiranga/arxiv-mcp-server)
 
 A Model Context Protocol (MCP) server that enables interacting with the arXiv API using natural language.
 
@@ -34,6 +35,14 @@ A Model Context Protocol (MCP) server that enables interacting with the arXiv AP
         - `start` (int): Index of the first result to return
 
 ## Setup
+
+### Installing via Smithery
+
+To install arXiv Server for Claude Desktop automatically via [Smithery](https://smithery.ai/server/@prashalruchiranga/arxiv-mcp-server):
+
+```bash
+npx -y @smithery/cli install @prashalruchiranga/arxiv-mcp-server --client claude
+```
 
 ### Manual Installation
 
