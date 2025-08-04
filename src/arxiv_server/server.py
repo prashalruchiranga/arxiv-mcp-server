@@ -11,7 +11,7 @@ import fitz
 mcp = FastMCP("arxiv-server")
 
 USER_AGENT = "arxiv-app/1.0"
-ARXIV_API_BASE = "http://export.arxiv.org/api"
+ARXIV_API_BASE = "https://export.arxiv.org/api"
 DOWNLOAD_PATH = os.getenv("DOWNLOAD_PATH")
 
 async def make_api_call(url: str, params: dict[str, str]) -> str | None:
