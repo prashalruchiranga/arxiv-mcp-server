@@ -36,16 +36,16 @@ A Model Context Protocol (MCP) server that enables interacting with the arXiv AP
 
 ## Setup
 
-### Manual Installation
+### MacOS
 
 Clone the repository
 ```
 git clone https://github.com/prashalruchiranga/arxiv-mcp-server.git
 cd arxiv-mcp-server
 ```
-Install `uv` package manager. For more details on installing on other operating systems, visit the [official uv documentation](https://docs.astral.sh/uv/getting-started/installation/).
+Install `uv` package manager. For more details on installing, visit the [official uv documentation](https://docs.astral.sh/uv/getting-started/installation/).
 ```
-# Using Homebrew for macOS
+# Using Homebrew
 brew install uv
 
 # or
@@ -55,7 +55,31 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 Create and activate virtual environment.
 ```
 uv venv --python=python3.13
-source .venv/bin/activate   # or `venv\Scripts\activate` on Windows
+source .venv/bin/activate
+```
+
+Install development dependencies.
+```
+uv sync
+```
+
+### Windows
+
+Install `uv` package manager. For more details on installing, visit the [official uv documentation](https://docs.astral.sh/uv/getting-started/installation/).
+```
+# Use irm to download the script and execute it with iex
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
+Close and reopen the shell, then clone the repository.
+```
+git clone https://github.com/prashalruchiranga/arxiv-mcp-server.git
+cd arxiv-mcp-server
+```
+
+Create and activate virtual environment.
+```
+uv venv --python=python3.13
+source .venv\Scripts\activate
 ```
 
 Install development dependencies.
@@ -66,7 +90,7 @@ uv sync
 ## Usage with Claude Desktop
 To enable this integration, add the server configuration to your `claude_desktop_config.json` file. Make sure to create the file if it doesn’t exist.
 
-On MacOS: `~/Library/Application Support/Claude/claude_desktop_config.json` On Windows: `%APPDATA%/Claude/claude_desktop_config.json`
+On MacOS: `~/Library/Application Support/Claude/claude_desktop_config.json` On Windows: `%APPDATA%/Roaming/Claude/claude_desktop_config.json`
 
 ```
 {
